@@ -1,52 +1,65 @@
-"use client";
+import Link from "next/link";
+import { footerNav, site, socials } from "@/content/site";
+import { Container } from "@/components/ui";
+import { Icon } from "@/lib/icons";
 
-import { Linkedin, Twitter, Github } from "lucide-react";
-
-const socialLinks = [
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Github, href: "#", label: "GitHub" },
-];
-
-export default function Footer() {
+export function Footer() {
   return (
-    <footer className="border-t border-border px-6 py-5 sm:px-10">
-      <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-        <div className="flex items-center gap-3">
-          <p className="text-sm font-bold tracking-tighter">
-            <span className="text-primary">Syn</span>
-            <span className="text-foreground">Mynd</span>
-          </p>
-          <span className="hidden h-4 w-px bg-border sm:block" />
-          <p className="hidden text-xs text-muted sm:block">
-            AI Agents • Intelligent Automation • SaaS Solutions
-          </p>
-        </div>
+    <footer className="border-t border-border bg-surface/40">
+      <Container className="py-16">
+        <div className="grid gap-12 lg:grid-cols-[1.5fr_2fr]">
+          <div className="flex flex-col gap-4">
+            <Link href="/" className="text-xl font-extrabold tracking-tighter">
+              <span className="text-accent">Syn</span>
+              <span>Mynd</span>
+            </Link>
+            <p className="max-w-xs text-sm leading-relaxed text-muted">
+              {site.description}
+            </p>
+            <p className="text-sm text-muted">{site.location}</p>
+            <div className="mt-2 flex gap-2">
+              {socials.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  aria-label={social.label}
+                  className="flex h-9 w-9 items-center justify-center rounded-pill border border-border text-muted transition-colors hover:border-accent hover:text-accent"
+                >
+                  <Icon name={social.icon} size={16} />
+                </a>
+              ))}
+            </div>
+          </div>
 
-        {/* Social + copyright */}
-        <div className="flex items-center gap-5">
-          <div className="flex items-center gap-2.5">
-            {socialLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={link.label}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted transition-all hover:border-primary hover:text-primary"
-              >
-                <link.icon size={14} strokeWidth={1.5} />
-              </a>
+          <div className="grid gap-8 sm:grid-cols-3">
+            {footerNav.map((group) => (
+              <div key={group.heading} className="flex flex-col gap-3">
+                <h3 className="font-mono text-xs uppercase tracking-[0.15em] text-text">
+                  {group.heading}
+                </h3>
+                {group.links.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-sm text-muted transition-colors hover:text-accent"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
             ))}
           </div>
-          <span className="h-4 w-px bg-border" />
-          <p className="text-xs text-muted/60">
-            &copy; {new Date().getFullYear()}{" "}
-            <span className="font-bold text-primary">Syn</span>
-            <span className="font-bold text-foreground">Mynd</span>
+        </div>
+
+        <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted">
+            © {new Date().getFullYear()} {site.name}. All rights reserved.
+          </p>
+          <p className="font-mono text-xs uppercase tracking-[0.15em] text-muted">
+            {site.tagline}
           </p>
         </div>
-      </div>
+      </Container>
     </footer>
   );
 }

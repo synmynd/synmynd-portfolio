@@ -1,76 +1,109 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { nav } from "@/content/site";
+import { ButtonLink } from "@/components/ui/Button";
+import { ThemeToggle } from "./ThemeToggle";
+import { cn } from "@/lib/utils";
 
-export default function Navbar() {
+export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const scrollTo = (id: string) => {
-    setMobileOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "glass border-b border-border/50 shadow-sm"
-          : "bg-transparent"
-      }`}
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
+        scrolled || open
+          ? "border-b border-border bg-base/85 backdrop-blur-xl"
+          : "border-b border-transparent",
+      )}
     >
-      <div className="flex items-center justify-between px-6 py-4 sm:px-10">
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="text-2xl font-extrabold tracking-tighter"
-        >
-          <span className="text-primary">Syn</span>
-          <span className="text-foreground">Mynd</span>
-        </button>
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-6 py-4 sm:px-10">
+        <Link href="/" className="text-xl font-extrabold tracking-tighter">
+          <span className="text-accent">Syn</span>
+          <span>Mynd</span>
+        </Link>
 
-        {/* Desktop: Get Started Button */}
-        <div className="hidden md:block">
+        <nav className="hidden items-center gap-1 lg:flex">
+          {nav.map((item) => {
+            const active =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-pill px-3.5 py-2 text-sm transition-colors",
+                  active
+                    ? "text-accent"
+                    : "text-muted hover:bg-surface hover:text-text",
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <ButtonLink href="/contact" className="hidden sm:inline-flex">
+            Book a call
+          </ButtonLink>
           <button
-            onClick={() => scrollTo("contact")}
-            className="rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20"
+            onClick={() => setOpen((value) => !value)}
+            aria-label="Toggle menu"
+            aria-expanded={open}
+            className="flex h-9 w-9 items-center justify-center rounded-pill border border-border text-text lg:hidden"
           >
-            Get Started
+            {open ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
-
-        {/* Mobile Hamburger */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="text-foreground md:hidden"
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
       </div>
 
-      {/* Mobile Menu */}
-      {mobileOpen && (
-        <div className="glass border-t border-border/50 md:hidden">
-          <div className="flex flex-col gap-1 px-6 py-4">
-            <button
-              onClick={() => scrollTo("contact")}
-              className="rounded-full bg-primary px-5 py-2.5 text-center text-sm font-medium text-white transition-all hover:bg-primary/90"
+      {open && (
+        <nav className="border-t border-border bg-base lg:hidden">
+          <div className="flex flex-col gap-1 px-6 py-5">
+            {nav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-3 text-base text-text transition-colors hover:bg-surface"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <ButtonLink
+              href="/contact"
+              size="lg"
+              className="mt-3"
+              onClick={() => setOpen(false)}
             >
-              Get Started
-            </button>
+              Book a call
+            </ButtonLink>
           </div>
-        </div>
+        </nav>
       )}
-    </nav>
+    </header>
   );
 }
